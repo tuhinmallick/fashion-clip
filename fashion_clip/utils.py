@@ -33,7 +33,7 @@ def get_cache_directory():
     return cache_dir
 
 
-def _is_hugging_face_repo(path, api_token=None)->bool:
+def _is_hugging_face_repo(path, api_token=None) -> bool:
     try:
         username, repo_name = path.split('/')
     except:
@@ -41,7 +41,7 @@ def _is_hugging_face_repo(path, api_token=None)->bool:
     print(username, repo_name)
 
     url = HUGGING_FACE_REPO_URL.format(username, repo_name)
-    headers = {"Authorization": "Bearer {}".format(api_token)} if api_token else {}
+    headers = {"Authorization": f"Bearer {api_token}"} if api_token else {}
     response = requests.get(url, headers=headers)
     return response.status_code == 200
 
@@ -54,18 +54,18 @@ def _download(url, destination):
     expected_sha256 = url.split("/")[-2]
     filename = os.path.basename(url)
     download_target = os.path.join(destination, filename)
-    print('Begin download of {} ...'.format(filename))
+    print(f'Begin download of {filename} ...')
 
     if os.path.isfile(download_target):
         if file_sha256(download_target) == expected_sha256:
-            print('Using cached version found at : {}'.format(download_target))
+            print(f'Using cached version found at : {download_target}')
             return download_target
         else:
             os.remove(download_target)
             print('WARNING: Cached File SHA does not match expected SHA; re-downloading file')
     if urlparse(url).scheme == 's3':
         # Private S3 bucket
-        print('Downloading {} from S3'.format(filename))
+        print(f'Downloading {filename} from S3')
         assert os.getenv('AWS_ACCESS_KEY_ID')
         assert os.getenv('AWS_SECRET_KEY')
         s3_client = S3Client(aws_key=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret=os.getenv('AWS_SECRET_KEY'))
@@ -84,7 +84,9 @@ def _download(url, destination):
             for chunk in response.iter_content(chunk_size=4096):
                 fout.write(chunk)
     if file_sha256(download_target) != expected_sha256:
-        raise RuntimeError(f"Model has been downloaded but the SHA256 checksum does not not match")
+        raise RuntimeError(
+            "Model has been downloaded but the SHA256 checksum does not not match"
+        )
 
     return download_target
 
@@ -96,36 +98,36 @@ def display_images(image_paths,
                    max_images=15,
                    font_size=8,
                    text_wrap_length=35):
-        if not image_paths:
-            print("No images to display.")
-            return
-        if len(image_paths) > max_images:
-            print(f"Showing {max_images} images of {len(image_paths)}:")
-            image_paths = image_paths[0:max_images]
-        height = max(height, len(image_paths) // columns * height)
-        # height = height
-        fig = plt.figure(figsize=(width, height))
-        # open images
-        images = [Image.open(f) for f in image_paths]
-        for i, image in enumerate(images):
-            ax = plt.subplot(int(len(images) / columns + 1), columns, i + 1)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            plt.box(False)
-            ax.imshow(image)
+    if not image_paths:
+        print("No images to display.")
+        return
+    if len(image_paths) > max_images:
+        print(f"Showing {max_images} images of {len(image_paths)}:")
+        image_paths = image_paths[:max_images]
+    height = max(height, len(image_paths) // columns * height)
+    # height = height
+    fig = plt.figure(figsize=(width, height))
+    # open images
+    images = [Image.open(f) for f in image_paths]
+    for i, image in enumerate(images):
+        ax = plt.subplot(int(len(images) / columns + 1), columns, i + 1)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        plt.box(False)
+        ax.imshow(image)
 
-            info = product_info[i] if product_info else {}
-            display_text = ''
-            for k,v in info.items():
-                text = textwrap.wrap(str(v), text_wrap_length)
-                display_text += '{}\n'.format("\n".join(text))
-            ax.text(0, -0.1, display_text,
-                     fontfamily='sans serif',
-                     fontsize=font_size,
-                     transform= ax.transAxes,
-                     verticalalignment='top')
-        fig.tight_layout(h_pad=3, w_pad=0.1)
-        return fig
+        info = product_info[i] if product_info else {}
+        display_text = ''
+        for k,v in info.items():
+            text = textwrap.wrap(str(v), text_wrap_length)
+            display_text += '{}\n'.format("\n".join(text))
+        ax.text(0, -0.1, display_text,
+                 fontfamily='sans serif',
+                 fontsize=font_size,
+                 transform= ax.transAxes,
+                 verticalalignment='top')
+    fig.tight_layout(h_pad=3, w_pad=0.1)
+    return fig
 def display_images_from_url(urls, **kwargs):
     # download urls to local cache
     image_fnames = [os.path.basename(url) for url in urls]

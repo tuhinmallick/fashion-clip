@@ -43,10 +43,11 @@ class S3Client:
         :param prefix: only fetch objects whose key starts with this prefix (optional).
         :return: list of all objects in the bucket
         """
-        return [obj for obj in self.get_matching_s3_objects(bucket_name=bucket_name,
-                                                            prefix=prefix,
-                                                            suffix=suffix,
-                                                            infix=infix)]
+        return list(
+            self.get_matching_s3_objects(
+                bucket_name=bucket_name, prefix=prefix, suffix=suffix, infix=infix
+            )
+        )
 
     def get_matching_s3_objects(self, bucket_name, prefix='', suffix='', infix=''):
         """

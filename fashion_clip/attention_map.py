@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 def pad_to_square(image, size=224):
     original_size = image.size
     ratio = float(size) / max(original_size)
-    new_size = tuple([int(x * ratio) for x in original_size])
+    new_size = tuple(int(x * ratio) for x in original_size)
     new_im = Image.new("RGB", size=(size, size), color=(128, 128, 128))
     new_im.paste(image.resize(new_size, Image.ANTIALIAS),
                  ((size - new_size[0]) // 2,
