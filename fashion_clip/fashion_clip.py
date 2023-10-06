@@ -44,10 +44,10 @@ class FCLIPDataset:
     def __init__(self, name: str, image_source_path: str, image_source_type: str,  catalog: List[dict] = None):
 
         image_source_type = image_source_type.upper()
-        assert image_source_type in ['LOCAL', 'S3', 'URL']
+        assert image_source_type in {'LOCAL', 'S3', 'URL'}
 
         if name in _CATALOGS:
-            print('Loading dataset {}...'.format(name))
+            print(f'Loading dataset {name}...')
             catalog_path = _download(_CATALOGS[name], _CACHE_DIR)
             with open(catalog_path, 'rb') as f:
                 catalog = json.load(f)
@@ -240,7 +240,7 @@ class FashionCLIP:
             nn = cosine_sim.argsort()[:, -k:][:, ::-1]
         t2 = time.time()
         if debug:
-            print('Elapsed Time: {}s'.format(t2-t1))
+            print(f'Elapsed Time: {t2 - t1}s')
 
         return nn
 
@@ -292,7 +292,7 @@ class FashionCLIP:
             sims.append(sim)
             scores.append(sim * m)
         score = np.mean(np.clip(np.array(scores) - sims[0], 0, np.inf), axis=0)
-        for i in range(iterations):
+        for _ in range(iterations):
             score = np.clip(score - np.mean(score), 0, np.inf)
         score = (score - np.min(score)) / (np.max(score) - np.min(score))
 
